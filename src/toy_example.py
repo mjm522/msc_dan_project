@@ -1,57 +1,116 @@
 import numpy as np
+import scipy.linalg as la
+
+np.random.seed(0)
+
+'''
+Install SCIPY library to make this code work
+pip install scipy
+'''
+
+'''
+This funciton implements a discretized lqr controller
+it takes in system matrix A, the control matrix B
+The state penalization Q, and the control penalization R
+It formualates the ricatti equation and solves it
+Please read the materials given in the doc folder
+'''
+
+def dlqr(A, B, Q, R):
+    """Solve the discrete time lqr controller.
+    
+    x[k+1] = A x[k] + B u[k]
+     
+    cost = sum x[k].T*Q*x[k] + u[k].T*R*u[k]
+    """
+    #ref Bertsekas, p.151
+ 
+    #first, try to solve the ricatti equation
+    X = la.solve_discrete_are(A, B, Q, R)
+     
+    #compute the LQR gain
+    K = la.pinv( np.dot( (np.dot(np.dot(B.T, X), B) + R) , np.dot(np.dot(B.T, X), A) ).T )
+
+    eigVals, eigVecs = la.eig( A - np.dot(B,K) )
+     
+    return K, eigVals
 
 
-def non_linear_term(q, dq):
-    a0 = 1e-5
-    a1 = 1e-4
+'''
+This is a class that encapsulates the dynamics of a point mass object.
+It has the A matrix, B matrix 
+It also has an option to compute the non_linear_term when a configuration is passed
+the compute_nxt_state funciton computes the next state if the current state and control is passed
+the state q = [x, y, dx, dy]
+the control  u = [Fx, Fy]
+'''
 
-    return a0*(q**2) +  a1*(dq**2)
+class Dynamics():
+
+    def __init__(self, dt=0.01):
+        '''
+        the system matrix
+        '''
+        self.A = np.array([[1.,0.,dt, 0.],
+                           [0.,1.,0., dt],
+                           [0.,0.,1., 0.],
+                           [0.,0.,0., 1.]])
+        '''
+        the control matrix
+        '''
+        self.B = np.array([[0.,0.],
+                           [0.,0.],
+                           [1.,0.],
+                           [0.,1.]])
+
+    def non_linear_term(self, q):
+        return q + np.random.randn(4)
 
 
-def dynamics(q, dq, u, dt=0.01, disturb=False):
-    mass    = 1.
-    gravity = -9.81
-    length  =  1.
+    def compute_nxt_state(self, q, u, disturb=False):
 
-    ddq = (1./mass)*(u-gravity)
+        q = np.dot((np.eye(4) + self.A), q) + np.dot(self.B,u)
 
-    dq += ddq*dt
-    q  += dq*dt
+        if disturb:
+            q += self.non_linear_term(q)
 
-    if disturb:
-        q += non_linear_term(q, dq)
-
-    return q, dq
+        return q
 
 
 
-def compute_ctrl(q0, dq0, qf, dqf, dynamics, correction_dynamics=None):
+def compute_ctrl(q0, qf, dynamics, correction_dynamics=None):
     '''
     find a control command using the start, final and the dynamics
     at present it is not doing anything, just returning a random control input
     so initially the correction dyanmics is none and later it learns it
+    The state penalization Q, and the control penalization R
     '''
+
+    Q = np.eye(4)*0.1
+    R = np.eye(2)*0.01
+
+    K, eigVals = dlqr(dynamics.A, dynamics.B, Q, R)
 
     if correction_dynamics is not None:
         '''
         add the corrected dyanmics to the computed dyanmics
         '''
+        pass
 
-    return np.random.rand()
+    return np.dot(-K, (qf-q0))
 
 
-def collect_data_and_learn_correction(total_data_points=100):
+def collect_data_and_learn_correction(dynamics, total_data_points=100):
     
     for k in range(total_data_points):
 
-        u = compute_ctrl(q, dq, qf, dqf, dynamics)
+        u = compute_ctrl(q, qf, dynamics)
 
-        q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
+        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=True)
 
-        data.append(np.array([q, dq, u, q_nxt, dq_nxt]))
+        data.append(np.r_[q, u, q_nxt])
 
         q = q_nxt
-        dq = dq_nxt
 
     np.savetxt('data.txt', data)
 
@@ -68,6 +127,11 @@ def main():
     goal  =  np.pi
 
     total_data_points = 100
+
+    '''
+    This is a dyanmics object of class Dynamics
+    '''
+    dynamics = Dynamics()
 
     data = []
 
