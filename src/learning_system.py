@@ -9,7 +9,7 @@ class LearningCorrection():
 
         '''
         data structure is 
-        100001 by 5
+        10001 by 5
         column 1 =  cart position
         column 2 =  cart velocity
         column 3 =  pendulum position
@@ -31,8 +31,8 @@ class LearningCorrection():
         self.dist_data_collection = self.data_setup.gather_data(K=5)
         
         if visualize_data:
-            for k  in range(self.disturbed_data.shape[0]):
-                visualize_plots("blah", self.disturbed_data[k,:,:])
+            for k  in range(self.dist_data_collection.shape[0]):
+                visualize_plots("Data collected", self.dist_data_collection[k,:,:])
                 print "Data collected index :=", k
                 raw_input("Press enter to see next")
 

@@ -39,11 +39,11 @@ dist_cart_pole.compute_lqr_gain()
 corrected_data = dist_cart_pole.integrate()
 
 
-# if play_movie:
-#     visualize(ideal_data)
-# else:
-#     visualize_plots('Ideal data', ideal_data)
-#     visualize_plots('Real data', dist_data)
-#     visualize_plots('Corrected data', corrected_data)
+if play_movie:
+    visualize_movie(ideal_data)
+else:
+    visualize_plots('Ideal data', ideal_data)
+    visualize_plots('Real data', dist_data)
+    visualize_plots('Corrected data', corrected_data)
 
 raw_input("Press enter to exit...")
