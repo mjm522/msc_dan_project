@@ -84,22 +84,36 @@ class CartPole(object):
             [B2]
         ])
 
+        self.state_dim = 4
+        self.ctrl_dim  = 1
         self.dt = dt
-        self.t = 0.0
-        self.x = init_conds[:]
+        self.init_conds = init_conds
         self.end = end
-
-        self.ctrlr = None
+        self.reset()
 
         if disturb:
             self.add_model_disturbance(2.234)
-        
+
+    def reset(self):
+        self.t = 0.0
+        self.x = self.init_conds[:]
+        self.ctrlr = None
+
     def add_model_disturbance(self, value):
         A_disturb = asmatrix(eye(4))*value
         self.A += A_disturb
 
     def correct_model_disturbance(self, correction):
-        self.A += correction
+        if correction.shape[0] == 4 and correction.shape[1] == 4:
+            self.A += correction
+        else:
+            raise("Correction matrix passed has a dimention mismatch with system model A")
+
+    def peturb_model(self, peturbation):
+        if peturbation.shape[0] == 4 and peturbation.shape[1] == 4:
+            self.A += peturbation
+        else:
+            raise("Peturbation matrix passed has a dimention mismatch with system model A")
 
     def compute_lqr_gain(self):
         self.ctrlr = LQR(self.A,self.B)

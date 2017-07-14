@@ -1,10 +1,8 @@
-import os
-from math import sin, cos, pi
+from numpy import pi
 from cart_pole import CartPole
-import matplotlib.pyplot as plt
-from render_movie import visualize
+from plot_graphs import visualize_plots
+from render_movie import visualize_movie
 from learning_system import LearningCorrection
-
 
 
 play_movie = False
@@ -28,83 +26,24 @@ dist_cart_pole = CartPole(
 dist_cart_pole.compute_lqr_gain()
 dist_data = dist_cart_pole.integrate()
 
-
-plt.figure('Ideal system', figsize=(15,15))
-plt.subplot(311)
-plt.plot(ideal_data[:,0], color='r')
-plt.plot(ideal_data[:,1], color='g')
-plt.xlabel("time steps")
-plt.ylabel("cart magnitudes")
-
-plt.subplot(312)
-plt.plot(ideal_data[:,2], color='r')
-plt.plot(ideal_data[:,3], color='g')
-plt.xlabel("time steps")
-plt.ylabel("pendulum magnitudes")
-
-plt.subplot(313)
-plt.plot(ideal_data[:,4], color='b')
-plt.xlabel("time steps")
-plt.ylabel("control magnitudes")
-
-
-plt.figure('Disturbed system', figsize=(15,15))
-plt.subplot(311)
-plt.plot(dist_data[:,0], color='r')
-plt.plot(dist_data[:,1], color='g')
-plt.xlabel("time steps")
-plt.ylabel("cart magnitudes")
-
-plt.subplot(312)
-plt.plot(dist_data[:,2], color='r')
-plt.plot(dist_data[:,3], color='g')
-plt.xlabel("time steps")
-plt.ylabel("pendulum magnitudes")
-
-plt.subplot(313)
-plt.plot(dist_data[:,4], color='b')
-plt.xlabel("time steps")
-plt.ylabel("control magnitudes")
-
-
 # ## Learn the system model
-lc = LearningCorrection(ideal_system_model=ideal_cart_pole, 
+lc = LearningCorrection(ideal_system=ideal_cart_pole,
 	                    ideal_data=ideal_data, 
-	                    disturbed_data=dist_data)
+	                    real_system=dist_cart_pole)
 
 
-model_correction = lc.compute_correction()
-
-corr_cart_pole = CartPole(
-    dt=.001,
-    init_conds=[0, 0., pi, 0.], #x, dx, phi, dphi
-    end=10,
-    disturb=True,
-)
-corr_cart_pole.correct_model_disturbance(model_correction)
-corr_cart_pole.compute_lqr_gain()
-corrected_data = corr_cart_pole.integrate()
-
-plt.figure('Corrected system', figsize=(15,15))
-plt.subplot(311)
-plt.plot(corrected_data[:,0], color='r')
-plt.plot(corrected_data[:,1], color='g')
-plt.xlabel("time steps")
-plt.ylabel("cart magnitudes")
-
-plt.subplot(312)
-plt.plot(corrected_data[:,2], color='r')
-plt.plot(corrected_data[:,3], color='g')
-plt.xlabel("time steps")
-plt.ylabel("pendulum magnitudes")
-
-plt.subplot(313)
-plt.plot(corrected_data[:,4], color='b')
-plt.xlabel("time steps")
-plt.ylabel("control magnitudes")
+model_correction = lc.compute_correction(visualize_data=True)
+dist_cart_pole.reset()
+dist_cart_pole.correct_model_disturbance(model_correction)
+dist_cart_pole.compute_lqr_gain()
+corrected_data = dist_cart_pole.integrate()
 
 
-if play_movie:
-    visualize(ideal_data)
-else:
-    plt.show()
+# if play_movie:
+#     visualize(ideal_data)
+# else:
+#     visualize_plots('Ideal data', ideal_data)
+#     visualize_plots('Real data', dist_data)
+#     visualize_plots('Corrected data', corrected_data)
+
+raw_input("Press enter to exit...")

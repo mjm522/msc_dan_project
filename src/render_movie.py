@@ -11,7 +11,7 @@ from cart_pole import CartPole
 plt.ion()
 plt.show()
 
-def visualize(data):
+def visualize_movie(data):
     
     fig = plt.figure(0)
     fig.suptitle("cart_pole on Cart")

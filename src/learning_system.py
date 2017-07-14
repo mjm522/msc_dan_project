@@ -1,9 +1,11 @@
+from plot_graphs import visualize_plots
 from numpy import matrix, array, asmatrix, eye
+from data_collection_setup import DataCollectionSetup
 
 
 class LearningCorrection():
 
-    def __init__(self, ideal_system_model, ideal_data, disturbed_data):
+    def __init__(self, ideal_system, ideal_data, real_system):
 
         '''
         data structure is 
@@ -15,20 +17,32 @@ class LearningCorrection():
         column 5 =  control command
         '''
 
-        self.ideal_data = ideal_data
-        self.disturbed_data = disturbed_data
-        self.model = ideal_system_model
+        self.ideal_data  = ideal_data
+        self.ideal_model = ideal_system
+        self.real_model  = real_system
 
-        self.A = self.model.A
-        self.B = self.model.B
+        self.A = self.ideal_model.A
+        self.B = self.ideal_model.B
+
+        self.data_setup = DataCollectionSetup(self.real_model)
 
 
-    def compute_correction(self):
+    def collect_data(self, visualize_data):
+        self.disturbed_data = self.data_setup.gather_data(K=5)
+        
+        if visualize_data:
+            for k  in range(self.disturbed_data.shape[0]):
+                visualize_plots("blah", self.disturbed_data[k,:,:])
+                print "Data collected index :=", k
+                raw_input("Press enter to see next")
+
+    def compute_correction(self, visualize_data=False):
 
         '''
         this is the function you will have to implement.
 
         '''
+        self.collect_data(visualize_data=visualize_data)
 
         model_correction = asmatrix(eye(4)*-2.234)
 
