@@ -1,6 +1,6 @@
 from numpy import pi, array, zeros, random
 from cart_pole import CartPole
-
+random.seed(0)
 
 class DataCollectionSetup():
 
@@ -10,6 +10,10 @@ class DataCollectionSetup():
         self.ctrl_dim = self.system_model.ctrl_dim
 
     def get_peturbation(self):
+        '''
+        this could be even made better , a better type of exploration
+        can be implemented.
+        '''
         return random.rand(self.state_dim,self.state_dim)
 
     def gather_data(self, K):

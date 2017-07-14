@@ -28,7 +28,7 @@ class LearningCorrection():
 
 
     def collect_data(self, visualize_data):
-        self.disturbed_data = self.data_setup.gather_data(K=5)
+        self.dist_data_collection = self.data_setup.gather_data(K=5)
         
         if visualize_data:
             for k  in range(self.disturbed_data.shape[0]):
