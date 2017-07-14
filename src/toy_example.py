@@ -1,7 +1,12 @@
 import numpy as np
 import scipy.linalg as la
+import matplotlib.pyplot as plt
 
 np.random.seed(0)
+
+plt.figure(1, figsize=(15,15))
+plt.ion()
+plt.show(False)
 
 '''
 Install SCIPY library to make this code work
@@ -58,18 +63,18 @@ class Dynamics():
         '''
         the control matrix
         '''
-        self.B = np.array([[0.,0.],
-                           [0.,0.],
-                           [1.,0.],
-                           [0.,1.]])
+        self.B = np.array([[0., 0.],
+                           [0., 0.],
+                           [dt, 0.],
+                           [0., dt]])
 
     def non_linear_term(self, q):
         return q + np.random.randn(4)
 
 
     def compute_nxt_state(self, q, u, disturb=False):
-
-        q = np.dot((np.eye(4) + self.A), q) + np.dot(self.B,u)
+        
+        q = np.dot(self.A, q) + np.dot(self.B, u)
 
         if disturb:
             q += self.non_linear_term(q)
@@ -85,9 +90,11 @@ def compute_ctrl(q0, qf, dynamics, correction_dynamics=None):
     so initially the correction dyanmics is none and later it learns it
     The state penalization Q, and the control penalization R
     '''
-
-    Q = np.eye(4)*0.1
-    R = np.eye(2)*0.01
+    Q = np.array([[1.,0.,0.,0.],
+                  [0.,1.,0.,0.],
+                  [0.,0.,10.,0.],
+                  [0.,0.,0.,10.]])
+    R = np.eye(2)*0.06
 
     K, eigVals = dlqr(dynamics.A, dynamics.B, Q, R)
 
@@ -97,7 +104,9 @@ def compute_ctrl(q0, qf, dynamics, correction_dynamics=None):
         '''
         pass
 
-    return np.dot(-K, (qf-q0))
+    print "U \n", np.dot(-K, (q0-qf))
+
+    return np.dot(-K, (q0-qf))
 
 
 def collect_data_and_learn_correction(dynamics, total_data_points=100):
@@ -122,58 +131,108 @@ def collect_data_and_learn_correction(dynamics, total_data_points=100):
     return correction_dynamics
 
 
+def visualize(start, goal, point_mass_trajectory, error_list):
+    plt.clf()
+    plt.subplot(221)
+    plt.scatter(start[0], start[1], color='r')
+    plt.scatter(goal[0],  goal[1],  color='g')
+
+    plt.plot(point_mass_trajectory[0,:], point_mass_trajectory[1,:], color='b')
+    plt.xlim([-0.1, 1.])
+    plt.ylim([-0.1, 1.])
+    plt.xlabel("X location")
+    plt.ylabel("Y location")
+
+    plt.subplot(222)
+    plt.plot(error_list, color='m')
+    plt.xlabel("time steps")
+    plt.ylabel("error magnitude")
+
+    plt.subplot(223)
+    plt.plot(point_mass_trajectory[2,:], color='r')
+    plt.xlabel("time steps")
+    plt.ylabel("x velocity magnitude")
+
+    plt.subplot(224)
+    plt.plot(point_mass_trajectory[3,:], color='g')
+    plt.xlabel("time steps")
+    plt.ylabel("y velocity magnitude")
+
+    plt.draw()
+    plt.pause(0.0001)
+
+
 def main():
-    start = 0.
-    goal  =  np.pi
+    start =  np.array([0.,0.,0.,0.]) #x,y,dx,dy
+    goal  =  np.array([0.5582151,   0.5582151,   0.39304926,  0.39304926]) #x,y,dx,dy
 
     total_data_points = 100
+
+    time_steps = 500
 
     '''
     This is a dyanmics object of class Dynamics
     '''
+    q  = start.copy()
+    qf = goal.copy()
+
     dynamics = Dynamics()
 
     data = []
 
-    q = start
-    dq = 0.
-    qf = goal
-    dqf = 0.
+    point_mass_trajectory = np.zeros([4, time_steps])
+    point_mass_trajectory[point_mass_trajectory==0.] = np.nan
+    point_mass_trajectory[:, 0] = start
+    
+    error_list = np.asarray([np.nan for _ in range(time_steps)])
 
-    u = compute_ctrl(q, dq, qf, dqf, dynamics)
+    error_list[0] = np.linalg.norm(start-goal)
 
-    '''
-    the first is the ideal case where the system is able to compute the
-    right control command to take it from start to goal
-    '''
-    q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=False)
-    print "Error in q \t", abs(q_nxt-qf)
-    print "Error in dq \t", abs(dq_nxt-dqf)
+    for t in range(1, time_steps):
+
+        u = compute_ctrl(q0=q, qf=qf, dynamics=dynamics)
+
+        '''
+        the first is the ideal case where the system is able to compute the
+        right control command to take it from start to goal
+        '''
+        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=False)
+        q = q_nxt
+        print "State \n", q
+
+        point_mass_trajectory[:, t] = q_nxt
+        error_list[t] = np.linalg.norm(q_nxt-qf)
+
+        visualize(start, goal, point_mass_trajectory, error_list)
+
+    print q_nxt
 
     '''
     this is the actual case and will show show that the computed control wont take the system to the goal 
     due to the presence of non linear term
     '''
 
-    q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
+    # q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
 
-    print "Error in q \t", abs(q_nxt-qf)
-    print "Error in dq \t", abs(dq_nxt-dqf)
+    # print "Error in q \t", abs(q_nxt-qf)
+    # print "Error in dq \t", abs(dq_nxt-dqf)
 
-    correction_dynamics = collect_data_and_learn_correction()
+    # correction_dynamics = collect_data_and_learn_correction()
 
 
-    u = compute_ctrl(q, dq, qf, dqf, dynamics, correction_dynamics)
+    # u = compute_ctrl(q, dq, qf, dqf, dynamics, correction_dynamics)
 
-    '''
-    this is the corrected case and will show show that the computed control wont take the system to the goal 
-    due to the presence of non linear term
-    '''
+    # '''
+    # this is the corrected case and will show show that the computed control wont take the system to the goal 
+    # due to the presence of non linear term
+    # '''
 
-    q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
+    # q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
 
-    print "Error in q \t", abs(q_nxt-qf)
-    print "Error in dq \t", abs(dq_nxt-dqf)
+    # print "Error in q \t", abs(q_nxt-qf)
+    # print "Error in dq \t", abs(dq_nxt-dqf)
+
+    raw_input("Press enter to exit...")
 
 
 if __name__ == '__main__':
