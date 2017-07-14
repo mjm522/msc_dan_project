@@ -1,8 +1,13 @@
 import os
 from math import sin, cos, pi
-import matplotlib.pyplot as plt
 from cart_pole import CartPole
+import matplotlib.pyplot as plt
+from render_movie import visualize
 from learning_system import LearningCorrection
+
+
+
+play_movie = False
 
 ideal_cart_pole = CartPole(
     dt=.001,
@@ -99,4 +104,7 @@ plt.xlabel("time steps")
 plt.ylabel("control magnitudes")
 
 
-plt.show()
+if play_movie:
+    visualize(ideal_data)
+else:
+    plt.show()
