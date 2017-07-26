@@ -16,6 +16,8 @@ class DataCollectionSetup():
         '''
         return random.rand(self.state_dim,self.state_dim)
 
+        
+
     def gather_data(self, K):
         data = zeros([K, 10001, self.state_dim+self.ctrl_dim])
 

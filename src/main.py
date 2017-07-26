@@ -32,11 +32,12 @@ lc = LearningCorrection(ideal_system=ideal_cart_pole,
 	                    real_system=dist_cart_pole)
 
 
-model_correction = lc.compute_correction(visualize_data=False)
+model_correction = lc.compute_correction(visualize_data=True)
 dist_cart_pole.reset()
 dist_cart_pole.correct_model_disturbance(model_correction)
 dist_cart_pole.compute_lqr_gain()
 corrected_data = dist_cart_pole.integrate()
+
 
 
 if play_movie:

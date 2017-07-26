@@ -1,24 +1,28 @@
-import numpy as np
-import scipy.linalg as la
-import matplotlib.pyplot as plt
-
-np.random.seed(0)
-
-plt.figure(1, figsize=(15,15))
-plt.ion()
-plt.show(False)
 
 '''
 Install SCIPY library to make this code work
 pip install scipy
 '''
 
+import numpy as np
+import scipy.linalg as la
+import matplotlib.pyplot as plt
+
+#This makes the random numbers predictable
+np.random.seed(0)
+
+#This creates a graph which is larger for the viewer
+#plt.figure(1, figsize=(15,15))
+#plt.ion()
+#plt.show(False)
+
+
 '''
 This funciton implements a discretized lqr controller
 it takes in system matrix A, the control matrix B
 The state penalization Q, and the control penalization R
 It formualates the ricatti equation and solves it
-Please read the materials given in the doc folder
+Don't understand the materials given in the doc folder
 '''
 
 def dlqr(A, B, Q, R):
@@ -68,6 +72,7 @@ class Dynamics():
                            [dt, 0.],
                            [0., dt]])
 
+    
     def non_linear_term(self, q):
         return q + np.random.randn(4)
 
@@ -77,7 +82,7 @@ class Dynamics():
         q = np.dot(self.A, q) + np.dot(self.B, u)
 
         if disturb:
-            q += self.non_linear_term(q)
+            q += 0.01#self.non_linear_term(q)
 
         return q
 
@@ -164,7 +169,7 @@ def visualize(start, goal, point_mass_trajectory, error_list):
 
 def main():
     start =  np.array([0.,0.,0.,0.]) #x,y,dx,dy
-    goal  =  np.array([0.5582151,   0.5582151,   0.39304926,  0.39304926]) #x,y,dx,dy
+    goal  =  np.array([.5682151,   0.5682151,   0.36304926,  0.36304926]) #x,y,dx,dy
 
     total_data_points = 100
 
@@ -196,7 +201,7 @@ def main():
         the first is the ideal case where the system is able to compute the
         right control command to take it from start to goal
         '''
-        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=False)
+        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=True)
         q = q_nxt
         print "State \n", q
 
