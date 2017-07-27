@@ -82,7 +82,7 @@ class Dynamics():
         q = np.dot(self.A, q) + np.dot(self.B, u)
 
         if disturb:
-            q += 0.01#self.non_linear_term(q)
+            q += self.non_linear_term(q)
 
         return q
 
@@ -173,7 +173,7 @@ def main():
 
     total_data_points = 100
 
-    time_steps = 500
+    time_steps = 100
 
     '''
     This is a dyanmics object of class Dynamics
@@ -201,7 +201,7 @@ def main():
         the first is the ideal case where the system is able to compute the
         right control command to take it from start to goal
         '''
-        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=True)
+        q_nxt = dynamics.compute_nxt_state(q=q, u=u, disturb=False)
         q = q_nxt
         print "State \n", q
 
