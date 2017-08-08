@@ -1,0 +1,98 @@
+initial data collected for position
+0.0,8.4406054485615716,0.017
+0.02,6.8769867199972614,0.037
+0.040000000000000001,5.55,0.038
+0.040000000000000001,4.65,0.048
+0.050000000000000003,3.80,0.065
+0.070000000000000007,3.07,0.043
+0.040000000000000001,2.56,0.069
+0.070000000000000007,2.02,0.089
+0.089999999999999997,1.59,0.084
+0.080000000000000002,1.42,0.100
+0.10000000000000001,1.17,0.094
+0.089999999999999997,1.29,0.0935
+0.089999999999999997,1.29,0.081
+
+
+
+
+#This creates a graph which is larger for the viewer
+#plt.figure(1, figsize=(15,15))
+#plt.ion()
+#plt.show(False)
+
+#solve the problem of accounting for noise with linear regression
+#Pass paramters A?,B?, u, x in for loop of execution
+
+def linearRegression(q,u,dynamics):
+
+    #x,y,dx,dy
+    #print("x","y","dx","dy")
+
+    #save data to a file but in real life 
+
+    #print(q, u)
+    A = dynamics.A
+    B = dynamics.B
+    u = 0
+    m = 0
+    x = 0
+
+    #compute the next state of x
+    #x_nxt = (A * x) + (B * u) #Add non linear term + no(x,u)
+    #compute the plane that it will show the line of best fit with m and b
+    #p = (m * x) + (B * u) #???? + c
+
+    #add derivative of m and b to iteratvely update?
+    #iterate over X and u, do I need to update A and B also from data?
+
+    #this will return the margin of error 
+    #sum (p) - (A*x[i] + B*u[i] - x_nxt)^2 
+    
+    #call the draw function to draw plotted points and maybe show the error if possible 
+
+
+
+
+
+
+
+
+
+
+
+end of toy_example.py
+    #np.savetxt("foo.csv", a, delimiter=",")
+    #np.savetxt('q_new.txt', q_array);
+    #np.savetxt('q_new_nxt.txt', q_nxt_array);
+    #np.savetxt('u_new.txt', u_array);
+
+   #print q_nxt
+
+    '''
+    
+    this is the actual case and will show show that the computed control wont take the system to the goal 
+    due to the presence of non linear term
+    '''
+
+    # q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
+
+    # print "Error in q \t", abs(q_nxt-qf)
+    # print "Error in dq \t", abs(dq_nxt-dqf)
+
+    # correction_dynamics = collect_data_and_learn_correction()
+
+
+    # u = compute_ctrl(q, dq, qf, dqf, dynamics, correction_dynamics)
+
+    # '''
+    # this is the corrected case and will show show that the computed control wont take the system to the goal 
+    # due to the presence of non linear term
+    # '''
+
+    # q_nxt, dq_nxt = dynamics(q=q, dq=dq, u=u, disturb=True)
+
+    # print "Error in q \t", abs(q_nxt-qf)
+    # print "Error in dq \t", abs(dq_nxt-dqf)
+
+   #raw_input("Press enter to exit...")

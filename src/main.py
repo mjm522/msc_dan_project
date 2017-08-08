@@ -5,7 +5,7 @@ from render_movie import visualize_movie
 from learning_system import LearningCorrection
 
 
-play_movie = False
+play_movie = True
 
 ideal_cart_pole = CartPole(
     dt=.001,
@@ -20,7 +20,7 @@ dist_cart_pole = CartPole(
     dt=.001,
     init_conds=[0, 0., pi, 0.], #x, dx, phi, dphi
     end=10,
-    disturb=True,
+    disturb=False,
 )
 
 dist_cart_pole.compute_lqr_gain()
@@ -32,7 +32,7 @@ lc = LearningCorrection(ideal_system=ideal_cart_pole,
 	                    real_system=dist_cart_pole)
 
 
-model_correction = lc.compute_correction(visualize_data=True)
+model_correction = lc.compute_correction(visualize_data=False)
 dist_cart_pole.reset()
 dist_cart_pole.correct_model_disturbance(model_correction)
 dist_cart_pole.compute_lqr_gain()
