@@ -100,14 +100,14 @@ class LearningCorrection():
        
 
         #This needs changing so as it implement a learning method
-        #model_correction = asmatrix(eye(4)*-2.234) - original
+        model_correction = asmatrix(eye(4)) 
         #model_correction = asmatrix(eye(4)*300.234)
         #print(model_correction)
 
-        model_correction = [[300,0,0,0],
-                             [0,300,0,0],
-                             [0,0,300,0],
-                             [0,0,0,300]]
+       # model_correction = [[300,0,0,0],
+        #                     [0,300,0,0],
+         #                    [0,0,300,0],
+          #                   [0,0,0,300]]
 
        
 
